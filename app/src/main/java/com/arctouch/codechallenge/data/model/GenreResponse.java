@@ -1,4 +1,4 @@
-package com.arctouch.codechallenge.model;
+package com.arctouch.codechallenge.data.model;
 
 import java.util.List;
 
