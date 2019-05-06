@@ -1,6 +1,8 @@
-package com.arctouch.codechallenge.model;
+package com.arctouch.codechallenge.data.model;
 
-public class Genre {
+import java.io.Serializable;
+
+public class Genre implements Serializable {
 
     public int id;
     public String name;

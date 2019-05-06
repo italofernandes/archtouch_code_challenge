@@ -1,10 +1,11 @@
-package com.arctouch.codechallenge.model;
+package com.arctouch.codechallenge.data.model;
 
 import com.squareup.moshi.Json;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Movie {
+public class Movie implements Serializable {
     public int id;
     public String title;
     public String overview;

@@ -1,7 +1,9 @@
-package com.arctouch.codechallenge.home;
+package com.arctouch.codechallenge.view.home.adpters;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.paging.PagedListAdapter;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,19 +12,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.arctouch.codechallenge.R;
-import com.arctouch.codechallenge.model.Movie;
+import com.arctouch.codechallenge.data.model.Movie;
 import com.arctouch.codechallenge.util.MovieImageUrlBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.util.List;
+public class HomeAdapter extends PagedListAdapter<Movie ,HomeAdapter.ViewHolder> {
 
-public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
+    private View.OnClickListener clickListener;
 
-    private List<Movie> movies;
+    private static DiffUtil.ItemCallback<Movie> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<Movie>() {
+                @Override
+                public boolean areItemsTheSame(Movie oldItem, Movie newItem) {
+                    return oldItem.equals(newItem);
+                }
 
-    public HomeAdapter(List<Movie> movies) {
-        this.movies = movies;
+                @Override
+                public boolean areContentsTheSame(Movie oldItem, Movie newItem) {
+                    return oldItem.equals(newItem);
+                }
+            };
+
+    public HomeAdapter(View.OnClickListener clickListener) {
+        super(DIFF_CALLBACK);
+        this.clickListener = clickListener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -33,9 +47,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         private final TextView genresTextView;
         private final TextView releaseDateTextView;
         private final ImageView posterImageView;
+        private final View itemView;
 
         public ViewHolder(View itemView) {
             super(itemView);
+
+            this.itemView = itemView;
             titleTextView = itemView.findViewById(R.id.titleTextView);
             genresTextView = itemView.findViewById(R.id.genresTextView);
             releaseDateTextView = itemView.findViewById(R.id.releaseDateTextView);
@@ -43,17 +60,21 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         }
 
         public void bind(Movie movie) {
+
+            itemView.setTag(movie);
+
             titleTextView.setText(movie.title);
             genresTextView.setText(TextUtils.join(", ", movie.genres));
             releaseDateTextView.setText(movie.releaseDate);
 
             String posterPath = movie.posterPath;
-            if (TextUtils.isEmpty(posterPath) == false) {
-                Glide.with(itemView)
-                        .load(movieImageUrlBuilder.buildPosterUrl(posterPath))
-                        .apply(new RequestOptions().placeholder(R.drawable.ic_image_placeholder))
-                        .into(posterImageView);
-            }
+
+            posterImageView.setImageBitmap(null);
+
+            Glide.with(itemView)
+                    .load(movieImageUrlBuilder.buildPosterUrl(posterPath))
+                    .apply(new RequestOptions().placeholder(R.drawable.ic_image_placeholder))
+                    .into(posterImageView);
         }
     }
 
@@ -61,16 +82,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_item, parent, false);
+        view.setOnClickListener(clickListener);
         return new ViewHolder(view);
     }
 
     @Override
-    public int getItemCount() {
-        return movies.size();
-    }
-
-    @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(movies.get(position));
+        holder.bind(getItem(position));
     }
 }
